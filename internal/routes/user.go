@@ -46,3 +46,67 @@ func GetUsers(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(responseUsers)
 }
+
+func findUserByID(id string) (models.User, error) {
+	var user models.User
+	err := database.Database.Db.Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+func GetUser(c fiber.Ctx) error {
+	id := c.Params("id")
+	var user models.User
+
+	//if err := database.Database.Db.Where("id = ?", id).First(&user).Error; err != nil {
+	//	return c.Status(fiber.StatusNotFound).JSON(err.Error())
+	//}
+
+	user, err := findUserByID(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err.Error())
+	}
+
+	responseUser := CreateResponseUser(user)
+	return c.Status(fiber.StatusOK).JSON(responseUser)
+}
+
+func UpdateUser(c fiber.Ctx) error {
+	id := c.Params("id")
+	var user models.User
+
+	//if err := database.Database.Db.Where("id = ?", id).First(&user).Error; err != nil {
+	//	return c.Status(fiber.StatusNotFound).JSON(err.Error())
+	//}
+
+	user, err := findUserByID(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err.Error())
+	}
+
+	if err := c.Bind().Body(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(err.Error())
+	}
+
+	database.Database.Db.Save(&user)
+
+	responseUser := CreateResponseUser(user)
+	return c.Status(fiber.StatusOK).JSON(responseUser)
+}
+
+func DeleteUser(c fiber.Ctx) error {
+	id := c.Params("id")
+	var user models.User
+
+	user, err := findUserByID(id)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(err.Error())
+	}
+
+	database.Database.Db.Delete(&user)
+
+	return c.Status(fiber.StatusNoContent).JSON(nil)
+
+}
