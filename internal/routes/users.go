@@ -49,6 +49,7 @@ func GetUsers(c fiber.Ctx) error {
 
 func findUserByID(id string) (models.User, error) {
 	var user models.User
+
 	err := database.Database.Db.Where("id = ?", id).First(&user).Error
 	if err != nil {
 		return user, err
