@@ -86,9 +86,13 @@ func UpdateUser(c fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(err.Error())
 	}
 
-	if err := c.Bind().Body(&user); err != nil {
+	var updatedUser models.User
+	if err := c.Bind().Body(&updatedUser); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(err.Error())
 	}
+
+	user.FirstName = updatedUser.FirstName
+	user.LastName = updatedUser.LastName
 
 	database.Database.Db.Save(&user)
 
